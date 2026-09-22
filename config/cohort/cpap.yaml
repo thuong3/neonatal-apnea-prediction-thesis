@@ -25,7 +25,7 @@ ids:
   - "015"
 
 # Only generic apnea was scored here and relabelled APNEA-CENTRAL; the true
-# subtype is unknown (see DATASET_ADAPTATION.md #3).
+# subtype is unknown (see Section 3.2 of the thesis).
 adverse_events:
   - APNEA-CENTRAL
 

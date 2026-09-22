@@ -9,7 +9,7 @@
 #
 # Identical to running with no experiment flag at all; it exists so the two arms
 # can be named and tabulated symmetrically, and so that every result in sections
-# 7-30 of PREDICTION_METHODOLOGY.md has a config that reproduces it.
+# Section 4.4 of the thesis describes the configuration that reproduces it.
 
 dataset:
   equal_per_patient: false

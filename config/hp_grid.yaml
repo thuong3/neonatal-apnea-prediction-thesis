@@ -5,7 +5,7 @@
 # 0.561 -> 0.645, 002 -> 0.659, 003 -> 0.656), so "the model cannot fit its own
 # training data" is currently not separable from "the model was not trained long
 # enough". These points settle that. If a wider, longer-trained network still
-# cannot fit the CPAP training windows, PREDICTION_METHODOLOGY.md section 22's
+# cannot fit the CPAP training windows, Section 4.3 of the thesis'
 # central claim stops being an assumption.
 #
 # STAGE 2 -- DROPOUT (the supervisor's request).

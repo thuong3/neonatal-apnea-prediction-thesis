@@ -13,12 +13,12 @@
 #   neonatal_robin_polysomnography  (raw Zenodo export)
 #       Declares a 1 s data record although the records are really 10 s long,
 #       so every rate comes out 10x too high. Annotations in
-#       `annotations_original/`. See DOMAIN_ADAPTATION.md #2.
+#       `annotations_original/`. See Section 4.1 of the thesis.
 #       ->  record_duration: 10     annotations_dir: annotations_original
 #
 # Getting this wrong is silent in one direction (over-correcting stretches the
 # recording and the annotations still "fit"), so check with the snippet in
-# DOMAIN_ADAPTATION.md #2 rather than assuming. Override on the command line:
+# Section 4.1 of the thesis rather than assuming. Override on the command line:
 #   source.record_duration=10 source.annotations_dir=annotations_original
 name: robin
 data_path: "data/robin_sequence"
@@ -46,7 +46,7 @@ ids:
   - "018"
   - "019"
 
-# Task matching (see DOMAIN_ADAPTATION.md #3): the target cohort's events are
+# Task matching (see Section 4.5 of the thesis): the target cohort's events are
 # generic "APNEA" relabelled to APNEA-CENTRAL -- the true subtype there is
 # unknown. Matching on ALL apnea subtypes is therefore the honest counterpart,
 # not central-only. Hypopnea is excluded because the target has none scored;

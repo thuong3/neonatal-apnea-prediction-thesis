@@ -26,7 +26,7 @@ dataset_mode: list
 # removes the second confounder from the cross-cohort comparison: with
 # config/experiment/no_np.yaml the channel sets match too, so a remaining
 # performance gap can only come from cohort/signal quality, not from event
-# type or channels. See PREDICTION_METHODOLOGY.md.
+# type or channels. See Section 4.5 of the thesis.
 adverse_events:
   - APNEA-CENTRAL
 # The other scored events MUST be cut out rather than ignored. If they were

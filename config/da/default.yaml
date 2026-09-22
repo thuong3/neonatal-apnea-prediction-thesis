@@ -68,7 +68,7 @@ finetune_head_lr: 1.0e-3
 # inert and the `coral` variant silently degenerates into `finetune_full`.
 # 5000 puts lambda * CORAL at roughly a third of BCE at the start of training,
 # i.e. a real but not dominant constraint. Sweep it (0 / 500 / 5000 / 50000)
-# before reporting -- see DOMAIN_ADAPTATION.md #6.
+# before reporting -- see Section 3.7 of the thesis.
 coral_lambda: 5000.0
 
 # Fraction of each held-out recording spent on per-patient calibration, for the
