@@ -1,0 +1,27 @@
+defaults:
+  - meta: default
+  - cohort@source: robin
+  - cohort@target: cpap
+  - network: nam_shared5
+  - optimizer: adam_w
+  - da: default
+
+# Windowing must be IDENTICAL for both cohorts -- otherwise the two domains
+# would differ in the task definition as well as in the data, and nothing
+# measured afterwards would be attributable to domain shift alone.
+# signal_types is the intersection of the two cohorts' channels: the Robin set
+# has real Nasal Pressure and the CPAP set has mask pressure, so neither
+# respiratory-pressure channel is shared and both are dropped.
+dataset:
+  dataset_mode: list
+  signal_types:
+    - Thorax
+    - HR
+    - PR
+    - SpO2
+    - PCO2
+  time_window: 6000 # 30s -> 30 * 200
+  lag: 3000 # 15s -> 15 * 200
+  away: 36000 # 3min -> 3 * 60 * 200
+  standardize: standard
+  downsample: none

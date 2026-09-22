@@ -1,0 +1,16 @@
+# @package _global_
+# NOTE: "NP" (true Nasal Pressure) is not populated for the CPAP cohort in
+# this repo -- CPAP mask pressure is its own "CPAP" channel (see
+# src/neonatal_utils.py). This file only applies to a data set with a real
+# nasal-airflow channel. For the CPAP-pressure-only ablation on this cohort,
+# use +experiment=single_mod_cpap instead.
+defaults:
+  - override /network: gap
+
+dataset:
+  dataset_mode: stacked
+  signal_types:
+    - NP
+
+network:
+  kernel_size: 17

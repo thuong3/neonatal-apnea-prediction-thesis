@@ -1,0 +1,28 @@
+# @package _global_
+# BA control: DO NOT cut SIGNAL-ARTIFACT out of the training windows.
+#
+# This is an ABLATION TO ARGUE AGAINST, not a better setting. The default
+# (config/dataset/neonatal.yaml) lists SIGNAL-ARTIFACT under `cutter_events`, so
+# no window may overlap a scored artifact. Removing that exclusion lets windows
+# sit on dropouts, and it MEASURABLY INFLATES the AuROC:
+#
+#   artifacts cut out (default)   mean test AuROC  0.5484
+#   artifacts kept (this file)                     0.5761   (+0.0277)
+#   -> higher in 11/15 patients, Wilcoxon p = 0.026
+#   (seed 0, lag 3000, both without the clock-drift correction)
+#
+# The mechanism is in the window counts: keeping artifacts adds +19.9 % windows
+# but only +3.6 % positives, i.e. ~3800 extra windows that are almost all
+# NEGATIVES and disproportionately contain dropouts. A flat dropout is trivially
+# separable and essentially never sits in a pre-apnea window, so the model gains
+# free separation from "dropout => negative". That is a data-quality artefact,
+# not prediction, which is exactly why the default cuts them.
+#
+# Run with: +experiment=artifacts_kept
+#
+# NOTE: SIGNAL-ARTIFACT is still READ from the annotations (read_data always
+# builds the mask); it is simply no longer used to exclude windows. Nothing else
+# about the task changes, so this is a clean one-variable comparison against the
+# default run at the same seed and lag.
+dataset:
+  cutter_events: []

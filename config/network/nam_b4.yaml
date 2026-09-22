@@ -1,0 +1,19 @@
+# 7-channel NAM: the six CPAP channels plus B4's causal trailing-baseline
+# channel. Used with
+#   +experiment=effort_baseline_channel
+#
+# NOTE: order is crucial, it must match dataset.signal_types.
+#   CPAP=17, Thorax=17, HR=11, PR=17, SpO2=11, PCO2=11  -- as the paper's nam --
+#   plus EffortRatio=17.
+#
+# Kernel 17 for EffortRatio, matching the other 5 Hz respiratory channels: the
+# feature it carries is a decline over seconds, and 17 taps at 5 Hz is ~3.4 s.
+# Hidden width 20 throughout, unchanged from the published network, so this
+# differs from `nam` in exactly one respect -- the extra channel.
+self: nam
+in_channels: [1, 1, 1, 1, 1, 1, 1]
+hidden_channels: [20, 20, 20, 20, 20, 20, 20]
+kernel_size: [17, 17, 11, 17, 11, 11, 17]
+
+# BA adaptation (F2): see config/network/nam.yaml.
+dropout_p: 0.0

@@ -1,0 +1,17 @@
+# 8-channel NAM: the six CPAP channels plus B2 bullet 7's two per-block
+# robust-centred channels. Used with
+#   +experiment=hr_spo2_dev_channels
+#
+# NOTE: order is crucial, it must match dataset.signal_types.
+#   CPAP=17, Thorax=17, HR=11, PR=17, SpO2=11, PCO2=11  -- as the paper's nam --
+#   plus HR_dev=11 and SpO2_dev=11.
+#
+# Kernel 11 for both added channels, matching their fixed-range siblings: they
+# carry the same signal at 1 Hz, just centred and scaled per block, so there is
+# no reason for a different receptive field. Hidden width 20 throughout,
+# unchanged from the published network, so this differs from `nam` in exactly
+# one respect -- the two extra channels.
+self: nam
+in_channels: [1, 1, 1, 1, 1, 1, 1, 1]
+hidden_channels: [20, 20, 20, 20, 20, 20, 20, 20]
+kernel_size: [17, 17, 11, 17, 11, 11, 11, 11]

@@ -1,0 +1,15 @@
+# @package _global_
+# BA ablation: single-channel NAM using ONLY the CPAP-pressure channel.
+# Answers directly whether CPAP mask pressure alone carries any predictive
+# signal (as opposed to contributing only in combination with other
+# channels). Run with: +experiment=single_mod_cpap
+defaults:
+  - override /network: gap
+
+dataset:
+  dataset_mode: stacked
+  signal_types:
+    - CPAP
+
+network:
+  kernel_size: 17

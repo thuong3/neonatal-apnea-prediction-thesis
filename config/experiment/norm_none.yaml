@@ -1,0 +1,29 @@
+# @package _global_
+# BA ablation (B2/B3): the normalisation 2x2.
+#
+# Vetter et al. standardise every respiratory/PPG signal on a 30 s TIME-WINDOW
+# basis. Under that transform two windows with identical waveform SHAPE but a
+# tenfold difference in AMPLITUDE are numerically identical. For the obstructive
+# events of the Robin cohort that costs nothing (the pattern there is waveform
+# irregularity). For central apnea the leading candidate precursor is a decline
+# in respiratory effort amplitude relative to the infant's own baseline -- which
+# per-window standardisation destroys by construction, and which the scoring
+# rule ("below 20% of the mean amplitude of the preceding breaths") is built on.
+#
+# Per-block normalisation instead uses the median and IQR/1.349 of the whole
+# block (one infant, one device = one ANALYSIS-START/STOP segment), computed
+# over the artifact-free samples only. After it, one unit is roughly one typical
+# breath amplitude for that infant on that device.
+#
+# Run all four and report all four cells. Verify first with
+#   python scripts/check_norm_chains.py
+#
+# CELL: neither -- THE CONTROL.
+# Raw decimated signals in arbitrary units, with per-channel gains that
+# differ by orders of magnitude between infants. Expected to be the
+# worst cell; it establishes that the comparison is about WHICH
+# normalisation, not about whether any is needed at all.
+
+dataset:
+  norm_per_window: false
+  norm_per_block: false

@@ -1,0 +1,65 @@
+# @package _global_
+# B2 bullet 7: HR and SpO2 carried as TWO channels each.
+#
+#   "Heart rate and SpO2: keep both scales. These are in physical units and are
+#    range-normalised to [-1, 1] over fixed ranges. The absolute level is
+#    clinically meaningful -- baseline heart rate 163-167 bpm and baseline SpO2
+#    96-97% in this cohort -- so keep the fixed-range channel as primary and add
+#    a second, per-block robust-centred channel for each. The network then sees
+#    both the absolute level and the deviation from this infant's own baseline
+#    on this device, which is the cheapest possible attack on between-patient
+#    shift."
+#
+# 8 inputs instead of 6, so this is NOT a cell of the B3 2x2 -- its runs are not
+# comparable on architecture, and it must not be bundled into that grid.
+#
+# CONTROL: +experiment=norm_block, at the same seeds. Same pipeline, same
+# windows, same normalisation, same floor -- six channels instead of eight, so
+# the difference is the two added channels and nothing else. norm_block ran at
+# all ten seeds in the B3 grid, so this needs 10 runs, not 20.
+#
+# WHY IT IS BUILT ON norm_block. Bullet 7 is part of B2, and the deviation
+# channels ARE the per-block robust transform applied to HR and SpO2. Running it
+# on any other cell would mean the two added channels used a different
+# normalisation from the five that were already block-normalised.
+#
+# WHAT THE PREVIEW SAID, so the result is read honestly either way
+# (scripts/hr_spo2_channel_preview.py, section 27.7): within a block the
+# fixed-range and centred channels are related by a strictly INCREASING affine
+# map, so they rank identically -- measured at max |delta AuROC| = 0.0 over all
+# 60 blocks. The second channel can therefore only remove between-block OFFSET,
+# and per infant that did not help (HR 0.5493 -> 0.5202 count-weighted). The
+# preview bounds a single-feature rank statistic, NOT what a non-linear
+# sub-network can extract from the 30 s waveform, which is why this sweep is run
+# anyway rather than declined on the preview alone.
+
+defaults:
+  - override /network: nam_b7
+
+dataset:
+  # Order must match config/network/nam_b7.yaml.
+  signal_types:
+    - CPAP
+    - Thorax
+    - HR
+    - PR
+    - SpO2
+    - PCO2
+    - HR_dev
+    - SpO2_dev
+  norm_per_window: false
+  norm_per_block: true
+  # As norm_block, plus floors for the two added channels. HR and SpO2 floors
+  # measured the same way as the rest (0.2 x the median block scale across the
+  # 60 blocks) by scripts/hr_spo2_channel_preview.py, which prints them: HR
+  # 1.423, SpO2 0.3651. They matter for the same reason the others do --
+  # patient 009's PCO2 scale is exactly 0.000 in two of four blocks, so a dead
+  # physical-unit sensor is not hypothetical in this cohort.
+  norm_scale_floor:
+    Abdomen: 5.228
+    CPAP: 0.09263
+    PR: 5.468
+    Thorax: 3.273
+    Thorax_sum: 0.3637
+    HR_dev: 1.423
+    SpO2_dev: 0.3651

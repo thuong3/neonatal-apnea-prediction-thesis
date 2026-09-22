@@ -1,0 +1,36 @@
+# @package _global_
+# BA ablation (B5): the price of real-time operation.
+#
+# B5: "Report both transductive and causal normalisation statistics. Whole-block
+# median and IQR are transductive: no label leakage, but they presume the entire
+# 6-hour block is in hand. Report (i) whole-block statistics as primary,
+# matching an 'adapt once per recording' deployment, and (ii) causal statistics
+# from an expanding window with a 10-minute warm-up, or a trailing 30-minute
+# window, matching real-time use. The difference between the two is the price of
+# real-time operation and deserves a sentence in the paper."
+#
+# The PRIMARY arm (i) is +experiment=norm_block, unchanged. These two configs are
+# arm (ii). All three are otherwise IDENTICAL -- same windows, same channels,
+# same floor -- so a paired per-infant difference isolates the statistics and
+# nothing else.
+#
+# Verify before running:  python scripts/check_causal_norm.py
+#
+# CELL: trailing 30-minute window.
+# At each window the median and IQR come from [window start - 30 min, window
+# start). Unlike the expanding arm this never converges on the transductive
+# statistics: it keeps adapting, so it tracks a drifting baseline (a belt
+# slipping, an infant's state changing) but is noisier, being built on 30
+# minutes rather than 6 hours. The same 10-minute warm-up floor applies at the
+# start of a block.
+
+dataset:
+  norm_per_window: false
+  norm_per_block: true
+  norm_stats_mode: trailing
+  norm_scale_floor:
+    Abdomen: 5.228
+    CPAP: 0.09263
+    PR: 5.468
+    Thorax: 3.273
+    Thorax_sum: 0.3637

@@ -1,0 +1,40 @@
+# TARGET cohort for domain adaptation: the CPAP / Embla study, 15 infants.
+# Same cohort as config/dataset/neonatal.yaml -- kept as a separate file so the
+# domain-adaptation script can hold two cohorts at once. The CPAP EDFs declare
+# their 10 s data records correctly, so no record_duration override is needed.
+name: cpap
+data_path: "data/brainimmaturity"
+annotations_dir: annotations
+record_duration: null
+
+ids:
+  - "001"
+  - "002"
+  - "003"
+  - "004"
+  - "005"
+  - "006"
+  - "007"
+  - "008"
+  - "009"
+  - "010"
+  - "011"
+  - "012"
+  - "013"
+  - "014"
+  - "015"
+
+# Only generic apnea was scored here and relabelled APNEA-CENTRAL; the true
+# subtype is unknown (see DATASET_ADAPTATION.md #3).
+adverse_events:
+  - APNEA-CENTRAL
+
+cutter_events:
+  - SIGNAL-ARTIFACT
+
+# Annotation-clock drift correction, measured per recording by
+# scripts/measure_clock_drift.py. Without it the annotations of this export run
+# ~158 ppm (~13.7 s per 24 h) fast against the signals, so a positive window
+# placed 15 s before the ANNOTATED onset really sits up to 25 s before the true
+# one by the end of a night. See config/clock_drift.yaml.
+clock_drift_file: config/clock_drift.yaml

@@ -1,0 +1,26 @@
+# @package _global_
+# BA ablation (F3): how much each INFANT contributes to training.
+#
+# The published sampler balances the two classes inside each infant but not the
+# infants against each other: an infant contributes 2*min(n_pos, n_neg) windows
+# per epoch. Measured on this cohort that runs 44 (patient 012) to 612
+# (patient 015) -- a 14-fold spread in which three infants supply 45 per cent of
+# all training data, while the reported metric is a mean over infants in which
+# every infant counts once.
+#
+# Verify the two arms with:  python scripts/check_sampler_equal.py
+# Pre-specification and the reason for the primary choice: PRE_SPECIFICATION.md
+#
+# ARM B -- every infant contributes equally. THE PRE-SPECIFIED PRIMARY.
+# Chosen before any result was seen, on the principled ground that it matches
+# the reported metric (a mean over infants), NOT because it scored better.
+# Each infant contributes 2 x median(min(n_pos, n_neg)) = 144 windows per epoch,
+# still 50/50 positive/negative internally. A different random subset is drawn
+# each epoch, so no window is permanently discarded the way a fixed positive cap
+# would discard it.
+
+dataset:
+  equal_per_patient: true
+  # Windows PER CLASS per infant per epoch. null -> the cohort median of
+  # min(n_pos, n_neg), which is 72 here (so 144 windows per infant).
+  sampler_target_per_class: null

@@ -1,0 +1,15 @@
+# @package _global_
+# BA ablation (F3): how much each INFANT contributes to training.
+#
+# See sampler_equal.yaml for the full rationale and the measured spread.
+#
+# ARM A -- the published sampler. Infants contribute in proportion to their
+# apnea count, so the largest supplies 18.3 per cent of an epoch and the
+# smallest 1.3 per cent.
+#
+# Identical to running with no experiment flag at all; it exists so the two arms
+# can be named and tabulated symmetrically, and so that every result in sections
+# 7-30 of PREDICTION_METHODOLOGY.md has a config that reproduces it.
+
+dataset:
+  equal_per_patient: false

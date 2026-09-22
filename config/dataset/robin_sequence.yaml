@@ -1,0 +1,66 @@
+ids:
+  - "001"
+  - "002"
+  - "003"
+  - "004"
+  - "005"
+  - "006"
+  - "007"
+  - "008"
+  - "009"
+  - "010"
+  - "011"
+  - "012"
+  - "013"
+  - "014"
+  - "015"
+  - "016"
+  - "017"
+  - "018"
+  - "019"
+
+# preprocessing parameters
+dataset_mode: list
+# Original Robin-sequence cohort: apnea AND hypopnea scored (all subtypes),
+# matching the paper's task -- unlike the CPAP cohort (central-apnea only).
+adverse_events:
+  - APNEA-OBSTRUCTIVE
+  - APNEA-CENTRAL
+  - APNEA-MIXED
+  - HYPOPNEA-OBSTRUCTIVE
+  - HYPOPNEA-CENTRAL
+  - HYPOPNEA-MIXED
+# Matches the original (pre-CPAP-adaptation) config: only movement is cut;
+# SIGNAL-ARTIFACT is not (the CPAP cutter_events adds it, this one doesn't).
+cutter_events:
+  - ACTIVITY-MOVE
+# Real nasal-pressure channel is available here (unlike the CPAP cohort,
+# where "CPAP" mask pressure stands in its place) -- see config/dataset/
+# neonatal.yaml and config/experiment/no_np.yaml for the CPAP-side analogue.
+signal_types:
+  - NP
+  - Thorax
+  - HR
+  - PR
+  - SpO2
+  - PCO2
+time_window: 6000 # 30s -> 30 * 200
+lag: 3000 # 15s -> 15 * 200
+away: 36000 # 3min -> 3 * 60 * 200
+standardize: standard
+downsample: none
+
+# NOT drift-corrected: the clock skew was measured on the CPAP/Embla export
+# only. This cohort's patient ids overlap that one's (001-015), so leaving this
+# unset -- rather than inheriting a default -- is what stops one cohort's
+# coefficients being applied to the other's recordings.
+clock_drift_file: null
+
+# File layout. TWO EXPORTS of this cohort exist and they need different values
+# (see config/cohort/robin.yaml for the full note):
+#   robin_sequence_clean          annotations/          record_duration: null
+#   raw Zenodo export             annotations_original/ record_duration: 10
+# Declared here rather than left implicit so they can be overridden without
+# `+` on the command line.
+annotations_dir: annotations
+record_duration: null

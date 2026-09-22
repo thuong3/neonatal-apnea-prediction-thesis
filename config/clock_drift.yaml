@@ -1,0 +1,57 @@
+# Annotation-clock drift of the CPAP export, measured per recording by
+# scripts/measure_clock_drift.py. Consumed by src/neonatal_utils.py.
+#
+# An annotation timestamp t (seconds after the EDF start) maps to a
+# sample index as
+#
+#     index = (t*(1 + slope_ppm*1e-6) + intercept_s) * TARGET_FREQ
+#
+# i.e. an event stamped at t is FOUND IN THE SIGNAL that much LATER than
+# the annotation says: ~0 s at the start of a recording, ~+10 s by the end
+# of a 24 h night.
+#
+# `intercept_s` is 0 for every recording and should normally stay there.
+# The slope is the measured, validated quantity -- with it applied, the
+# residual lag is FLAT to +-0.5 s across a whole night. The intercept is
+# not identifiable from the signals: fitted freely, the DESAT anchor puts
+# it at ~-1.9 s and the CPAP-modulation anchor at ~+1.4 s, i.e. they
+# bracket zero, which is the signature of each anchor's own bias in
+# locating an event rather than of a real offset at t = 0 (where the
+# recorder's real-time clock and its sample counter start together and so
+# cannot disagree). The leftover is under the ~2 s with which a mark is
+# placed by hand. Set it here only if a direct RemLogic comparison shows a
+# consistent constant -- that is the one measurement that can settle it.
+#
+# Cohort median slope: 160.2 ppm (~13.8 s per 24 h), over the 15 slopes below.
+# `intercept_s` is non-zero for four recordings (009, 010, 011, 015). It is NOT
+# a free parameter: it is the residual measured against the ANNOTATOR'S OWN RULE
+# (Thorax and Abdomen both flat >= 10 s) after the slope was applied, pooled over
+# every apnea in that recording, and applied only where that residual was >= 1 s
+# and flat across the night. For 015 it is +1.63 s measured over 457 events with
+# a spread of 0.15 s across thirds. The other eleven are already within +-1 s and
+# are deliberately left at 0 rather than fitted to their own noise.
+#
+# This supersedes the earlier "the intercept must be 0" reasoning, which held
+# while the anchors were only PROXIES for the scoring and bracketed zero with
+# equal-and-opposite bias. The belts anchor is not a proxy -- it reproduces the
+# scorer's decision -- so a residual against it is a real misplacement.
+#
+# `source` is the anchor the fit came from; 'cohort_median' means no
+# anchor passed the quality gate for that recording.
+
+patients:
+  "001": {slope_ppm: 182.10, intercept_s: 0.0, source: belts}
+  "002": {slope_ppm: 171.29, intercept_s: 0.0, source: belts}
+  "003": {slope_ppm: 159.15, intercept_s: 0.0, source: belts}
+  "004": {slope_ppm: 163.46, intercept_s: 0.0, source: belts}
+  "005": {slope_ppm: 158.83, intercept_s: 0.0, source: belts}
+  "006": {slope_ppm: 160.19, intercept_s: 0.0, source: belts}
+  "007": {slope_ppm: 175.01, intercept_s: 0.0, source: belts}
+  "008": {slope_ppm: 163.03, intercept_s: 0.0, source: belts}
+  "009": {slope_ppm: 2.45, intercept_s: 1.71, source: belts}
+  "010": {slope_ppm: 143.00, intercept_s: 1.52, source: belts}
+  "011": {slope_ppm: 186.81, intercept_s: -1.49, source: belts}
+  "012": {slope_ppm: 158.27, intercept_s: 0.0, source: desat}
+  "013": {slope_ppm: 175.88, intercept_s: 0.0, source: belts}
+  "014": {slope_ppm: 157.87, intercept_s: 0.0, source: belts}
+  "015": {slope_ppm: 145.81, intercept_s: 1.63, source: belts}

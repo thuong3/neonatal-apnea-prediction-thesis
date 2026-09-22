@@ -1,0 +1,60 @@
+# @package _global_
+# B4: "Add an explicit causal trailing-baseline channel."
+#
+#   Compute the envelope e(t) of the summed respiratory effort (RMS or Hilbert)
+#   and supply e(t) / median_{tau in [t-120s, t-15s]} e(tau) as an additional
+#   input channel. This encodes the scoring rule directly rather than hoping the
+#   network rediscovers it, and it is causal by construction.
+#
+# WHY THIS IS NOT A REPEAT of section 24, which came back at 0.505-0.529:
+# that script used a 10-30 min baseline and the 27.4 preview used the whole
+# ~6 h block. B4 asks for 120 s. The rule it encodes says "below 20% of the
+# amplitude of the PRECEDING BREATHS" -- seconds to a minute. Untested.
+#
+# WHY IT CAN HELP WHEN NOTHING ELSE DID: the network's input window is 30 s, so
+# it cannot see further back than that. This channel reaches 120 s back. It adds
+# context from OUTSIDE the window rather than rescaling what is already inside
+# it, which is why section 27.6's -0.025 does not bound it.
+#
+# PER-WINDOW STANDARDISATION IS OFF, and that is not incidental. The channel is
+# a scale-free ratio; z-scoring each 30 s window would erase it by construction
+# and manufacture a null. 27.6 also found per-window standardisation is the
+# worse cell anyway (-0.0252, p = 0.026), so this costs nothing.
+#
+# COMPARE AGAINST: +experiment=norm_none at the same seeds. That is the same
+# pipeline on the same windows with six channels instead of seven, so the
+# difference is the channel and nothing else.
+
+defaults:
+  - override /network: nam_b4
+
+dataset:
+  # Order must match config/network/nam_b4.yaml.
+  signal_types:
+    - CPAP
+    - Thorax
+    - HR
+    - PR
+    - SpO2
+    - PCO2
+    - EffortRatio
+  norm_per_window: false
+  norm_per_block: false
+  # NOT dead code, despite norm_per_block being false. effort_baseline_ratio
+  # normalises each BELT with these statistics before summing them (an
+  # inductance belt has an arbitrary per-belt gain, so the two must be put on a
+  # common scale or the sum is dominated by whichever belt has the larger gain).
+  # That inner step needs the same floor section 27.2a measured for Thorax_sum.
+  #
+  # WITHOUT IT, patient 009 block 2's Abdomen belt -- robust scale EXACTLY zero
+  # while swinging -4867..+2336 -- is divided by 1.0 and enters the sum in RAW
+  # units against a Thorax belt on unit scale. Measured consequence on that
+  # block's channel: 55.9% of samples change, by up to 1.000, i.e. the entire
+  # dynamic range of the channel. Every other block is bit-identical, which is
+  # exactly what a floor should do -- bite only where a sensor is dead.
+  norm_scale_floor:
+    Abdomen: 5.228
+    CPAP: 0.09263
+    PR: 5.468
+    Thorax: 3.273
+    Thorax_sum: 0.3637

@@ -1,0 +1,16 @@
+# 6-channel NAM for the SOURCE cohort only: the shared five channels plus the
+# real Nasal Pressure channel. Used with
+#   dataset.signal_types=[NP,Thorax,HR,PR,SpO2,PCO2] network=nam_source6
+# to run the source-internal diagnostic WITH nasal pressure.
+#
+# Why it exists: the published 0.78/0.80 differs from the shared-space setting
+# in two ways at once (6 vs 5 channels, and apnea+hypopnea vs apnea-only).
+# Running the diagnostic both with and without NP, holding the label set fixed
+# at apnea-only, separates those two costs instead of confounding them.
+#
+# NOTE: order is crucial, it must match dataset.signal_types.
+# (NP=17, Thorax=17, HR=11, PR=17, SpO2=11, PCO2=11 -- same as the paper's nam.)
+self: nam
+in_channels: [1, 1, 1, 1, 1, 1]
+hidden_channels: [20, 20, 20, 20, 20, 20]
+kernel_size: [17, 17, 11, 17, 11, 11]

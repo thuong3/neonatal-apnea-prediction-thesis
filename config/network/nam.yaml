@@ -1,0 +1,29 @@
+self: nam
+in_channels:
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+  - 1
+
+hidden_channels:
+  - 20
+  - 20
+  - 20
+  - 20
+  - 20
+  - 20
+
+# NOTE: order is crucial here, needs to fit the order in the dataset config
+kernel_size:
+  - 17 
+  - 17
+  - 11
+  - 17
+  - 11
+  - 11
+# BA adaptation (F2): the dropout probability, 0.0 = the published network.
+# At 0.0 no nn.Dropout module is inserted at all, so this key changes nothing
+# until a sweep sets it. Asserted by scripts/check_dropout_identity.py.
+dropout_p: 0.0

@@ -1,0 +1,38 @@
+# Data and results are not committed
+data/
+results/
+outputs/
+figures/
+*.edf
+*.EDF
+
+# Hydra run directories
+.hydra/
+multirun/
+src/outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# LaTeX build products
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc

@@ -1,0 +1,66 @@
+# SOURCE cohort for domain adaptation: the Robin-sequence polysomnography set
+# (Vetter et al. 2024, Zenodo 7711137), 19 infants.
+#
+# NOTE -- TWO EXPORTS OF THIS COHORT EXIST and they need different settings:
+#
+#   robin_sequence_clean          (VM, the DEFAULT here)
+#       Header already corrected: declares its 10 s data records properly, so
+#       pyedflib reports the true rates (NP 200, Thorax 50, PR 100, PCO2/SpO2
+#       2, HR 1 Hz). Annotations in `annotations/`. Verified: the annotations
+#       end at 48645 s in a 48670 s recording, ratio 1.00.
+#       ->  record_duration: null   annotations_dir: annotations
+#
+#   neonatal_robin_polysomnography  (raw Zenodo export)
+#       Declares a 1 s data record although the records are really 10 s long,
+#       so every rate comes out 10x too high. Annotations in
+#       `annotations_original/`. See DOMAIN_ADAPTATION.md #2.
+#       ->  record_duration: 10     annotations_dir: annotations_original
+#
+# Getting this wrong is silent in one direction (over-correcting stretches the
+# recording and the annotations still "fit"), so check with the snippet in
+# DOMAIN_ADAPTATION.md #2 rather than assuming. Override on the command line:
+#   source.record_duration=10 source.annotations_dir=annotations_original
+name: robin
+data_path: "data/robin_sequence"
+annotations_dir: annotations
+record_duration: null
+
+ids:
+  - "001"
+  - "002"
+  - "003"
+  - "004"
+  - "005"
+  - "006"
+  - "007"
+  - "008"
+  - "009"
+  - "010"
+  - "011"
+  - "012"
+  - "013"
+  - "014"
+  - "015"
+  - "016"
+  - "017"
+  - "018"
+  - "019"
+
+# Task matching (see DOMAIN_ADAPTATION.md #3): the target cohort's events are
+# generic "APNEA" relabelled to APNEA-CENTRAL -- the true subtype there is
+# unknown. Matching on ALL apnea subtypes is therefore the honest counterpart,
+# not central-only. Hypopnea is excluded because the target has none scored;
+# including it would make this a different task, not a different domain.
+adverse_events:
+  - APNEA-OBSTRUCTIVE
+  - APNEA-CENTRAL
+  - APNEA-MIXED
+
+cutter_events:
+  - ACTIVITY-MOVE
+
+# NOT drift-corrected: the clock skew was measured on the CPAP/Embla export
+# only. This cohort's patient ids overlap that one's (001-015), so leaving this
+# unset -- rather than inheriting a default -- is what stops one cohort's
+# coefficients being applied to the other's recordings.
+clock_drift_file: null

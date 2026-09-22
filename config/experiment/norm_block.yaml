@@ -1,0 +1,60 @@
+# @package _global_
+# BA ablation (B2/B3): the normalisation 2x2.
+#
+# Vetter et al. standardise every respiratory/PPG signal on a 30 s TIME-WINDOW
+# basis. Under that transform two windows with identical waveform SHAPE but a
+# tenfold difference in AMPLITUDE are numerically identical. For the obstructive
+# events of the Robin cohort that costs nothing (the pattern there is waveform
+# irregularity). For central apnea the leading candidate precursor is a decline
+# in respiratory effort amplitude relative to the infant's own baseline -- which
+# per-window standardisation destroys by construction, and which the scoring
+# rule ("below 20% of the mean amplitude of the preceding breaths") is built on.
+#
+# Per-block normalisation instead uses the median and IQR/1.349 of the whole
+# block (one infant, one device = one ANALYSIS-START/STOP segment), computed
+# over the artifact-free samples only. After it, one unit is roughly one typical
+# breath amplitude for that infant on that device.
+#
+# Run all four and report all four cells. Verify first with
+#   python scripts/check_norm_chains.py
+#
+# CELL: per-block robust normalisation only -- THE PROPOSED PRIMARY.
+# The only cell in which window-to-window amplitude information
+# survives into the network, i.e. the only one that can express the
+# 'effort declines before a central apnea' hypothesis.
+
+dataset:
+  norm_per_window: false
+  norm_per_block: true
+  # Lower bound on the robust scale, per channel: stops a dead or disconnected
+  # sensor producing a near-zero divisor. MEASURED, not guessed -- regenerate
+  # with `python scripts/measure_block_scales.py` (all 60 blocks, no GPU).
+  #
+  # It is not optional here. Patient 009 block 2's Abdomen belt has an IQR of
+  # EXACTLY ZERO while still swinging -4867..+2336: railed for most of the block,
+  # spiking the rest. Without a floor, apply_robust divides it by 1.0, so it
+  # enters Thorax_sum in raw units against a Thorax belt on unit scale, and that
+  # block's summed-effort scale comes out at 3.904 -- the largest of all 60
+  # blocks, against a median of 1.818. The dead belt inflates the divisor 2.1x
+  # and suppresses the GOOD belt's real signal.
+  #
+  # RULE USED: 0.2 x the median scale of that channel across blocks, NOT the
+  # 5th percentile B2 offers as an example. Measured on this cohort, p5 would
+  # clip 15 blocks to fix 1 -- 14 legitimate blocks distorted, because only
+  # Abdomen has a genuine failure and the other channels are a smooth continuum
+  # with no dead sensors. 0.2 x median clips exactly the one dead block, and is
+  # more stable under leave-one-infant-out on 4 of 5 channels (3-6% drift vs
+  # 16-19% for p5). B2's stated INTENT -- catch a dead sensor -- is honoured;
+  # its suggested statistic is not, and the deviation is deliberate.
+  #
+  # TRANSDUCTIVE NOTE: these are computed over all 60 blocks, not per fold. That
+  # is inert here rather than a leak: for Abdomen the next-lowest scale is 6.851,
+  # so ANY floor in (0, 6.851) produces identical output, and the leave-one-out
+  # range of this rule (4.9-5.5) sits entirely inside that gap. The floor's exact
+  # value changes no window in any fold.
+  norm_scale_floor:
+    Abdomen: 5.228
+    CPAP: 0.09263
+    PR: 5.468
+    Thorax: 3.273
+    Thorax_sum: 0.3637

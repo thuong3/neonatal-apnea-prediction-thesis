@@ -1,0 +1,47 @@
+ids:
+  - "001"
+  - "002"
+  - "003"
+  - "004"
+  - "005"
+  - "006"
+  - "007"
+  - "008"
+  - "009"
+  - "010"
+  - "011"
+  - "012"
+  - "013"
+  - "014"
+  - "015"
+
+# preprocessing parameters
+dataset_mode: list
+# CPAP data set: only generic (central) apnea was scored, no hypopnea.
+adverse_events:
+  - APNEA-CENTRAL
+# SIGNAL-ARTIFACT regions are cut out (the CPAP data has no ACTIVITY-MOVE).
+cutter_events:
+  - SIGNAL-ARTIFACT
+# NOTE: order is crucial here, needs to fit the order in the network config
+# "CPAP" = CPAP mask pressure, its own channel (not aliased as Nasal
+# Pressure -- see SIGNAL_LABEL_MAP note in src/neonatal_utils.py).
+signal_types:
+  - CPAP
+  - Thorax
+  - HR
+  - PR
+  - SpO2
+  - PCO2
+time_window: 6000 # 30s -> 30 * 200
+lag: 3000 # 15s -> 15 * 200 
+away: 36000 # 3min -> 3 * 60 * 200
+standardize: standard
+downsample: none
+
+# Annotation-clock drift correction, measured per recording by
+# scripts/measure_clock_drift.py. Without it the annotations of this export run
+# ~158 ppm (~13.7 s per 24 h) fast against the signals, so a positive window
+# placed 15 s before the ANNOTATED onset really sits up to 25 s before the true
+# one by the end of a night. See config/clock_drift.yaml.
+clock_drift_file: config/clock_drift.yaml

@@ -1,0 +1,11 @@
+# NAM over the 5 channels the Robin and CPAP cohorts have in common
+# (Thorax, HR, PR, SpO2, PCO2). Identical to the network block of
+# config/experiment/no_np.yaml -- the shared feature space is exactly the
+# no-NP ablation, which is what makes cross-cohort transfer well posed.
+#
+# NOTE: order is crucial, it must match dataset.signal_types in
+# config/domain_adaptation_config.yaml.
+self: nam
+in_channels: [1, 1, 1, 1, 1]
+hidden_channels: [20, 20, 20, 20, 20]
+kernel_size: [17, 11, 17, 11, 11]

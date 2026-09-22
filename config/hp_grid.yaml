@@ -1,0 +1,42 @@
+# F2's search space. Ten points, and the shape of the list is the argument.
+#
+# STAGE 1 -- CAPACITY AND SCHEDULE (the informative direction).
+# The training logs show train AuROC still climbing at epoch 10 (patient 001
+# 0.561 -> 0.645, 002 -> 0.659, 003 -> 0.656), so "the model cannot fit its own
+# training data" is currently not separable from "the model was not trained long
+# enough". These points settle that. If a wider, longer-trained network still
+# cannot fit the CPAP training windows, PREDICTION_METHODOLOGY.md section 22's
+# central claim stops being an assumption.
+#
+# STAGE 2 -- DROPOUT (the supervisor's request).
+# Dropout trades training fit for generalisation, and this model underfits
+# (train 0.655 vs test 0.555), so the prediction is that it does not help and
+# may hurt. It is run anyway, for the reason section 33.4 gives for running B2.7
+# after declining it on a preview: "we ran it" is a better answer than "we
+# reasoned it away".
+#
+# Every dropout point sits at 40 epochs, not 10. Dropout slows convergence, so
+# pairing it with the short schedule would confound the regulariser with
+# under-training and produce a null that means nothing.
+#
+# COST on the VM, at roughly 8 s/epoch with 11 training infants:
+#   inner grid  310 epochs x 8 s ~ 41 min per outer fold x 15 ~ 10 h
+#   final refits                                              ~ 2 h
+# Trim with `hp.configs=[base,wide_long,drop25]` for a cheap first pass.
+
+configs:
+  # name           hidden  epochs      lr  dropout
+  - {name: base,          hidden: 20, epochs: 10, lr: 0.0001, dropout: 0.00}
+  - {name: wide,          hidden: 40, epochs: 10, lr: 0.0001, dropout: 0.00}
+  - {name: long,          hidden: 20, epochs: 40, lr: 0.0001, dropout: 0.00}
+  - {name: wide_long,     hidden: 40, epochs: 40, lr: 0.0001, dropout: 0.00}
+  - {name: lr3,           hidden: 20, epochs: 10, lr: 0.0003, dropout: 0.00}
+  - {name: lr3_long,      hidden: 20, epochs: 40, lr: 0.0003, dropout: 0.00}
+  - {name: wide_long_lr3, hidden: 40, epochs: 40, lr: 0.0003, dropout: 0.00}
+  - {name: drop10,        hidden: 20, epochs: 40, lr: 0.0001, dropout: 0.10}
+  - {name: drop25,        hidden: 20, epochs: 40, lr: 0.0001, dropout: 0.25}
+  - {name: wide_drop25,   hidden: 40, epochs: 40, lr: 0.0001, dropout: 0.25}
+
+# Infants held out of the 14 as the INNER validation set, per outer fold. Three
+# is a compromise: fewer makes selection noisier, more starves the inner fit.
+n_val: 3

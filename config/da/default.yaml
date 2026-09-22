@@ -1,0 +1,85 @@
+# Domain-adaptation experiment settings (src/train_domain_adaptation.py).
+
+# Which rungs of the transfer ladder to run. Each is evaluated under the same
+# leave-one-patient-out split over the TARGET cohort, so the numbers are
+# directly comparable to each other and to the existing no_np baseline.
+#
+#   target_only    fresh model, target training patients only   (control)
+#   zero_shot      source-trained model applied unchanged       (size of shift)
+#   pooled         fresh model, source + target training data
+#   finetune_full  source-pretrained, all weights updated
+#   finetune_head  source-pretrained, conv layers frozen (linear probe)
+#   adabn          source-pretrained, only BatchNorm statistics re-estimated
+#   coral          source-pretrained, fine-tuned with CORAL feature alignment
+#
+# Two further rungs are implemented but NOT enabled by default, because they
+# score only the late part of each held-out recording (the early part is spent
+# on calibration) and so cannot be put in the same column as the rows above:
+#
+#   adabn_patient  source-pretrained, BN statistics re-estimated on THIS
+#                  infant's own early windows -- per-patient test-time
+#                  adaptation, label-free (Li et al. 2017; cf. TENT, Wang
+#                  et al. 2021). This is the domain-adaptation form of the
+#                  "let it see the first few events" proposal.
+#   zero_shot_late its paired control: the same unadapted model on the same
+#                  late windows. ALWAYS run these two together -- adabn_patient
+#                  on its own has nothing to be compared against.
+#
+# Run them as their own experiment:
+#   'da.variants=[zero_shot_late,adabn_patient]'
+variants:
+  - target_only
+  - zero_shot
+  - pooled
+  - finetune_full
+  - finetune_head
+  - adabn
+  - coral
+
+# Diagnostic (NOT a rung of the ladder, and scored on SOURCE patients):
+# leave-one-patient-out within the source cohort, restricted to the shared
+# 5-channel apnea-only setting. This is the precondition for interpreting the
+# ladder -- if the source model is itself near chance in the shared feature
+# space, a near-chance zero_shot says nothing about domain shift. Set
+# `da.variants=[]` to run this alone, without touching the target cohort.
+run_source_internal: true
+
+# Source pre-training (done once, reused by every fold -- the source cohort
+# contains no target patient, so there is no leakage across folds).
+pretrain_epochs: 10
+
+# Fine-tuning. A lower LR than pre-training is the usual choice: it keeps the
+# transferred features from being destroyed in the first few target batches.
+finetune_epochs: 10
+finetune_lr: 1.0e-5
+
+# `finetune_head` needs its OWN, much larger LR. It is a linear probe: only 111
+# parameters, all of them downstream of a frozen extractor, so there is nothing
+# to destroy and the small fine-tuning LR would leave it essentially identical
+# to `zero_shot` -- a null that would look like "transfer does not help" but
+# would really mean "the probe was never trained".
+finetune_head_lr: 1.0e-3
+
+# Weight of the CORAL feature-alignment penalty relative to BCE.
+#
+# This MUST NOT be left at 1.0. The CORAL loss carries Deep CORAL's 1/(4 d^2)
+# normalisation with d = 100 here, so on this data it measures ~7e-5 while BCE
+# is ~0.7 -- a factor of ~10 000. At lambda = 1 the penalty is numerically
+# inert and the `coral` variant silently degenerates into `finetune_full`.
+# 5000 puts lambda * CORAL at roughly a third of BCE at the start of training,
+# i.e. a real but not dominant constraint. Sweep it (0 / 500 / 5000 / 50000)
+# before reporting -- see DOMAIN_ADAPTATION.md #6.
+coral_lambda: 5000.0
+
+# Fraction of each held-out recording spent on per-patient calibration, for the
+# `adabn_patient` / `zero_shot_late` pair. The split is CHRONOLOGICAL: the first
+# `patient_calib_frac` of the windows adapt the BatchNorm statistics and are
+# never scored, the remainder is the evaluation set. A random split would adapt
+# the model on windows that come after the ones it is then tested on.
+patient_calib_frac: 0.33
+
+# Cap the number of source patients mixed in for `pooled`. null = use all.
+# The per-patient balanced sampler already balances classes within each
+# patient, but 19 source vs 14 target patients still tilts the mixture
+# towards the source; set this to 14 for a 1:1 cohort ratio.
+pooled_max_source_patients: null

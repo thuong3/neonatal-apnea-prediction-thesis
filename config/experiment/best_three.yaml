@@ -1,0 +1,30 @@
+# @package _global_
+# NOTE: "NP" (true Nasal Pressure) is not populated for the CPAP cohort in
+# this repo -- use "CPAP" instead of "NP" below to run this on
+# dataset_brainimmaturity (see src/neonatal_utils.py).
+defaults:
+  - override /network: nam
+
+dataset:
+  dataset_mode: list
+  signal_types:
+    - NP
+    - Thorax
+    - SpO2
+
+network:
+  in_channels:
+    - 1
+    - 1
+    - 1
+
+  hidden_channels:
+    - 20
+    - 20
+    - 20
+
+  # NOTE: order is crucial here, needs to fit the order in the dataset config
+  kernel_size:
+    - 17 
+    - 17
+    - 11

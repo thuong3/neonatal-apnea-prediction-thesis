@@ -1,0 +1,21 @@
+# @package _global_
+# BA ablation: 5-channel NAM WITHOUT the CPAP-pressure channel.
+# Use this to compare against the default 6-channel model (config/dataset/
+# neonatal.yaml), which includes CPAP mask pressure as its own "CPAP" channel
+# (not aliased as Nasal Pressure -- see src/neonatal_utils.py). Comparing the
+# two AUCs answers whether the CPAP-pressure channel contributes anything.
+# Run with: +experiment=no_np
+dataset:
+  signal_types:
+    - Thorax
+    - HR
+    - PR
+    - SpO2
+    - PCO2
+
+# kernel_size order must match signal_types order above
+# (Thorax=17, HR=11, PR=17, SpO2=11, PCO2=11 -- CPAP=17 dropped).
+network:
+  in_channels: [1, 1, 1, 1, 1]
+  hidden_channels: [20, 20, 20, 20, 20]
+  kernel_size: [17, 11, 17, 11, 11]

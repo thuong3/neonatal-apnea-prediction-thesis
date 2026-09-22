@@ -1,0 +1,12 @@
+mode: disabled # for using wandb, set to "online" after adding your wandb credentials
+experiment: null
+tag: null
+wandb_project: "neonatal"
+wandb_entity: "TODO"
+wandb_home: "TODO"
+
+data_path: "data/brainimmaturity" # folder containing signals/ and annotations/
+pickle_path: null
+result_path: "data/brainimmaturity/results"
+
+seed: null
